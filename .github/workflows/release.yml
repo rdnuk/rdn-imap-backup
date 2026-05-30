@@ -1,0 +1,82 @@
+name: Build and Release Binaries
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Bundle app with webpack
+        run: npm run build
+
+      - name: Cache js2bin prebuilt binaries
+        uses: actions/cache@v4
+        with:
+          path: ~/.js2bin
+          key: js2bin-node-22.22.2
+
+      - name: Build x64 binaries
+        run: |
+          npx js2bin \
+            --build \
+            --node=22.22.2 \
+            --platform=linux \
+            --platform=darwin \
+            --platform=win32 \
+            --arch=x64 \
+            --app=dist/bundle.js \
+            --name=imap-backup \
+            --cache
+
+      - name: Build arm64 binaries
+        run: |
+          npx js2bin \
+            --build \
+            --node=22.22.2 \
+            --platform=linux \
+            --platform=darwin \
+            --arch=arm64 \
+            --app=dist/bundle.js \
+            --name=imap-backup \
+            --cache
+
+      - name: Rename and prepare binaries
+        run: |
+          # Add .exe extension to the Windows binary
+          mv imap-backup-win32-x64 imap-backup-windows-x64.exe
+          # Ensure Unix binaries are executable
+          chmod +x imap-backup-linux-x64 imap-backup-linux-arm64 imap-backup-darwin-x64 imap-backup-darwin-arm64
+
+      - name: List built binaries
+        run: ls -lh imap-backup-*
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            imap-backup-linux-x64
+            imap-backup-linux-arm64
+            imap-backup-darwin-x64
+            imap-backup-darwin-arm64
+            imap-backup-windows-x64.exe

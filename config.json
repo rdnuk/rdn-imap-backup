@@ -1,0 +1,33 @@
+{
+  "accounts": [
+    {
+      "name": "Work Account",
+      "host": "imap.example.com",
+      "port": 993,
+      "secure": true,
+      "auth": {
+        "user": "user@example.com",
+        "pass": "your-password-here"
+      },
+      "mailboxes": ["INBOX", "Sent", "Drafts"],
+      "backupDir": "backups/work"
+    },
+    {
+      "name": "Personal Account",
+      "host": "imap.gmail.com",
+      "port": 993,
+      "secure": true,
+      "auth": {
+        "user": "user@gmail.com",
+        "pass": "your-app-password-here"
+      },
+      "mailboxes": ["INBOX", "[Gmail]/Sent Mail", "[Gmail]/All Mail"],
+      "backupDir": "backups/personal"
+    }
+  ],
+  "backup": {
+    "format": "eml",
+    "incrementalOnly": true,
+    "concurrentAccounts": 2
+  }
+}

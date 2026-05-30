@@ -1,0 +1,21 @@
+{
+  "name": "rdn-imap-backup",
+  "version": "1.0.0",
+  "description": "Backs up emails from multiple IMAP accounts to local storage",
+  "author": "Ryan Nolan",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "backup": "node src/index.js",
+    "build": "webpack"
+  },
+  "dependencies": {
+    "imapflow": "^1.0.170",
+    "mailparser": "^3.7.1",
+    "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "webpack": "^5.99.9",
+    "webpack-cli": "^6.0.1"
+  }
+}
