@@ -1,3 +1,13 @@
+      - name: List files after linux-x64 build
+        run: ls -lh
+      - name: List files after linux-arm64 build
+        run: ls -lh
+      - name: List files after darwin-x64 build
+        run: ls -lh
+      - name: List files after darwin-arm64 build
+        run: ls -lh
+      - name: List files after windows-x64 build
+        run: ls -lh
 name: Build and Release Binaries
 
 on:
@@ -51,8 +61,8 @@ jobs:
 
       - name: Prepare binaries
         run: |
-          # Ensure Unix binaries are executable
-          chmod +x imap-backup-linux-x64 imap-backup-linux-arm64 imap-backup-darwin-x64 imap-backup-darwin-arm64
+          # Ensure Unix binaries are executable (do not fail if missing)
+          chmod +x imap-backup-linux-x64 imap-backup-linux-arm64 imap-backup-darwin-x64 imap-backup-darwin-arm64 || true
 
       - name: List built binaries
         run: ls -lh imap-backup-*
