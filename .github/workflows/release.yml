@@ -14,6 +14,12 @@ jobs:
   build-and-release:
     runs-on: ubuntu-latest
 
+    env:
+      NODE_VERSION: '22.22.2'
+      JSBIN_DIR: /tmp/js2bin
+      APP_DIR: dist/bundle.js
+      APP_PREFIX: imap-backup
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -21,69 +27,47 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: ${{ env.NODE_VERSION }}
 
       - name: Install dependencies
-        run: npm install
+        run: npm install --with=dev
 
       - name: Bundle app with webpack
         run: npm run build
 
-      - name: Cache js2bin prebuilt binaries
-        uses: actions/cache@v4
-        with:
-          path: ~/.js2bin
-          key: js2bin-node-22.22.2
-
       - name: Build linux-x64 binary
-        run: npx js2bin --build --node=22.22.2 --platform=linux --arch=x64 --app=dist/bundle.js --name=imap-backup --cache
-
-      - name: List files after linux-x64 build
-        run: ls -lh
-
+        run: npx js2bin --build --node=$NODE_VERSION --platform=linux --arch=x64 --app=$APP_DIR --name=$APP_PREFIX --dir=$JSBIN_DIR --size=6MB
 
       - name: Build linux-arm64 binary
-        run: npx js2bin --build --node=22.22.2 --platform=linux --arch=arm64 --app=dist/bundle.js --name=imap-backup --cache
-
-      - name: List files after linux-arm64 build
-        run: ls -lh
-
+        run: npx js2bin --build --node=$NODE_VERSION --platform=linux --arch=arm64 --app=$APP_DIR --name=$APP_PREFIX --dir=$JSBIN_DIR --size=6MB
 
       - name: Build darwin-x64 binary
-        run: npx js2bin --build --node=22.22.2 --platform=darwin --arch=x64 --app=dist/bundle.js --name=imap-backup --cache
-
-      - name: List files after darwin-x64 build
-        run: ls -lh
-
+        run: npx js2bin --build --node=$NODE_VERSION --platform=darwin --arch=x64 --app=$APP_DIR --name=$APP_PREFIX --dir=$JSBIN_DIR --size=6MB
 
       - name: Build darwin-arm64 binary
-        run: npx js2bin --build --node=22.22.2 --platform=darwin --arch=arm64 --app=dist/bundle.js --name=imap-backup --cache
-
-      - name: List files after darwin-arm64 build
-        run: ls -lh
-
+        run: npx js2bin --build --node=$NODE_VERSION --platform=darwin --arch=arm64 --app=$APP_DIR --name=$APP_PREFIX --dir=$JSBIN_DIR --size=6MB
 
       - name: Build windows-x64 binary
-        run: npx js2bin --build --node=22.22.2 --platform=win32 --arch=x64 --app=dist/bundle.js --name=imap-backup --cache
-
-      - name: List files after windows-x64 build
-        run: ls -lh
+        run: npx js2bin --build --node=$NODE_VERSION --platform=windows --arch=x64 --app=$APP_DIR --name=$APP_PREFIX --dir=$JSBIN_DIR --size=6MB
+      
+      - name: List built binaries
+        run: ls -lh $JSBIN_DIR
 
       - name: Prepare binaries
         run: |
-          # Ensure Unix binaries are executable (do not fail if missing)
-          chmod +x imap-backup-linux-x64 imap-backup-linux-arm64 imap-backup-darwin-x64 imap-backup-darwin-arm64 || true
-
-      - name: List built binaries
-        run: ls -lh imap-backup-*
+          chmod +x $JSBIN_DIR/imap-backup-linux-x64 
+          chmod +x $JSBIN_DIR/imap-backup-linux-arm64 
+          chmod +x $JSBIN_DIR/imap-backup-darwin-x64 
+          chmod +x $JSBIN_DIR/imap-backup-darwin-arm64
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
           files: |
-            imap-backup-linux-x64
-            imap-backup-linux-arm64
-            imap-backup-darwin-x64
-            imap-backup-darwin-arm64
-            imap-backup-windows-x64.exe
+            $JSBIN_DIR/imap-backup-linux-x64
+            $JSBIN_DIR/imap-backup-linux-arm64
+            $JSBIN_DIR/imap-backup-darwin-x64
+            $JSBIN_DIR/imap-backup-darwin-arm64
+            $JSBIN_DIR/imap-backup-windows-x64.exe
+
