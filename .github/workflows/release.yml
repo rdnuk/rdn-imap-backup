@@ -59,10 +59,8 @@ jobs:
             --name=imap-backup \
             --cache
 
-      - name: Rename and prepare binaries
+      - name: Prepare binaries
         run: |
-          # Add .exe extension to the Windows binary
-          mv imap-backup-win32-x64 imap-backup-windows-x64.exe
           # Ensure Unix binaries are executable
           chmod +x imap-backup-linux-x64 imap-backup-linux-arm64 imap-backup-darwin-x64 imap-backup-darwin-arm64
 
