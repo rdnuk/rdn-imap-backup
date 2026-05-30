@@ -34,30 +34,20 @@ jobs:
           path: ~/.js2bin
           key: js2bin-node-22.22.2
 
-      - name: Build x64 binaries
-        run: |
-          npx js2bin \
-            --build \
-            --node=22.22.2 \
-            --platform=linux \
-            --platform=darwin \
-            --platform=win32 \
-            --arch=x64 \
-            --app=dist/bundle.js \
-            --name=imap-backup \
-            --cache
+      - name: Build linux-x64 binary
+        run: npx js2bin --build --node=22.22.2 --platform=linux --arch=x64 --app=dist/bundle.js --name=imap-backup --cache
 
-      - name: Build arm64 binaries
-        run: |
-          npx js2bin \
-            --build \
-            --node=22.22.2 \
-            --platform=linux \
-            --platform=darwin \
-            --arch=arm64 \
-            --app=dist/bundle.js \
-            --name=imap-backup \
-            --cache
+      - name: Build linux-arm64 binary
+        run: npx js2bin --build --node=22.22.2 --platform=linux --arch=arm64 --app=dist/bundle.js --name=imap-backup --cache
+
+      - name: Build darwin-x64 binary
+        run: npx js2bin --build --node=22.22.2 --platform=darwin --arch=x64 --app=dist/bundle.js --name=imap-backup --cache
+
+      - name: Build darwin-arm64 binary
+        run: npx js2bin --build --node=22.22.2 --platform=darwin --arch=arm64 --app=dist/bundle.js --name=imap-backup --cache
+
+      - name: Build windows-x64 binary
+        run: npx js2bin --build --node=22.22.2 --platform=win32 --arch=x64 --app=dist/bundle.js --name=imap-backup --cache
 
       - name: Prepare binaries
         run: |
