@@ -9,8 +9,7 @@ on:
 permissions:
   contents: write
   packages: write
-  releases: write
-  
+
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
