@@ -9,7 +9,8 @@
     "backup": "node src/index.js",
     "build": "webpack",
     "test:greenmail": "node scripts/greenmail-test.js",
-    "test:greenmail-release-binary": "node scripts/greenmail-release-binary-test.js"
+    "test:greenmail-release-binary": "node scripts/greenmail-release-binary-test.js",
+    "test:release-assets": "node scripts/check-release-assets.js"
   },
   "dependencies": {
     "imapflow": "^1.0.170",

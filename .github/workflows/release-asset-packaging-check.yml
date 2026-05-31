@@ -1,0 +1,35 @@
+name: Release Asset Packaging Check
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  packaging-check:
+    strategy:
+      matrix:
+        platform:
+          - os: macos-latest
+            asset: imap-backup-darwin-x64
+          - os: macos-latest
+            asset: imap-backup-darwin-arm64
+          - os: windows-latest
+            asset: imap-backup-windows-x64.exe
+    runs-on: ${{ matrix.platform.os }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.22.2'
+
+      - name: Validate latest release asset packaging
+        run: node scripts/check-release-assets.js "${{ matrix.platform.asset }}"
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

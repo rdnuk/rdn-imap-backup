@@ -125,17 +125,29 @@ function spawnBinary(binary, cwd, env) {
   }
 }
 
-function runGreenMailJar(jarPath) {
-  return new Promise((resolve, reject) => {
-    const proc = spawn('java', ['-jar', jarPath], {
-      env: process.env,
-      stdio: ['ignore', 'inherit', 'inherit'],
-    });
-    proc.on('error', reject);
-    proc.stdout && proc.stdout.on('data', () => {});
-    proc.stderr && proc.stderr.on('data', () => {});
-    resolve(proc);
-  });
+function runGreenMailDocker() {
+  const result = spawnSync(
+    'docker',
+    [
+      'run',
+      '-d',
+      '--rm',
+      '-p', '3025:3025',
+      '-p', '3143:3143',
+      'greenmail/standalone:latest',
+    ],
+    { stdio: ['ignore', 'pipe', 'inherit'], env: process.env }
+  );
+  if (result.error) throw result.error;
+  if (result.status !== 0) {
+    throw new Error(`Failed to start GreenMail Docker container: ${result.status}`);
+  }
+  return result.stdout.toString('utf8').trim();
+}
+
+function stopGreenMailDocker(containerId) {
+  if (!containerId) return;
+  spawnSync('docker', ['stop', containerId], { stdio: 'inherit', env: process.env });
 }
 
 function createConfigFile(configRoot, backupDir) {
@@ -277,20 +289,19 @@ async function main() {
     fs.chmodSync(binaryOutput, 0o755);
   }
 
-  const jarDir = path.join(workingDir, 'greenmail');
-  makeDir(jarDir);
-  const jarPath = path.join(jarDir, `greenmail-standalone-${GREENMAIL_VERSION}.jar`);
+  console.log('Starting GreenMail service...');
+  let greenMailContainerId;
+  const useService = process.env.USE_GREENMAIL_SERVICE === 'true';
+  const useDockerGreenMail = process.env.USE_DOCKER_GREENMAIL === 'true';
 
-  if (!fs.existsSync(jarPath)) {
-    console.log('Downloading GreenMail JAR...');
-    await downloadFile(
-      `https://repo1.maven.org/maven2/com/icegreen/greenmail/${GREENMAIL_VERSION}/greenmail-${GREENMAIL_VERSION}.jar`,
-      jarPath
-    );
+  if (!useService && !useDockerGreenMail) {
+    throw new Error('No GreenMail startup method configured. Set USE_GREENMAIL_SERVICE=true or USE_DOCKER_GREENMAIL=true.');
   }
 
-  console.log('Starting GreenMail service...');
-  const greenMailProcess = await runGreenMailJar(jarPath);
+  if (useDockerGreenMail) {
+    greenMailContainerId = runGreenMailDocker();
+  }
+
   try {
     await waitForPort('localhost', 3025);
     await waitForPort('localhost', 3143);
@@ -317,8 +328,8 @@ async function main() {
 
     console.log(`Binary smoke test passed: ${files.length} backed-up .eml file(s)`);
   } finally {
-    if (greenMailProcess && greenMailProcess.kill) {
-      greenMailProcess.kill();
+    if (greenMailContainerId) {
+      stopGreenMailDocker(greenMailContainerId);
     }
   }
 }

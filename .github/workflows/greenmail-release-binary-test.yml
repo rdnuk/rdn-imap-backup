@@ -13,17 +13,16 @@ jobs:
         platform:
           - os: ubuntu-latest
             asset: imap-backup-linux-x64
-            useDocker: false
           - os: ubuntu-latest
             asset: imap-backup-linux-arm64
-            useDocker: true
-          - os: macos-latest
-            asset: imap-backup-darwin-x64
-            useDocker: false
-          - os: windows-latest
-            asset: imap-backup-windows-x64.exe
-            useDocker: false
     runs-on: ${{ matrix.platform.os }}
+    services:
+      greenmail:
+        image: greenmail/standalone:latest
+        ports:
+          - 3025:3025
+          - 3143:3143
+          - 8080:8080
 
     steps:
       - name: Checkout repository
@@ -34,12 +33,6 @@ jobs:
         with:
           node-version: '22.22.2'
 
-      - name: Set up Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
       - name: Install dependencies
         run: npm install --with=dev
 
@@ -48,4 +41,5 @@ jobs:
         env:
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          USE_GREENMAIL_SERVICE: 'true'
           USE_DOCKER: ${{ matrix.platform.useDocker }}
