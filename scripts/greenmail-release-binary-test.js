@@ -282,9 +282,9 @@ async function main() {
   const jarPath = path.join(jarDir, `greenmail-standalone-${GREENMAIL_VERSION}.jar`);
 
   if (!fs.existsSync(jarPath)) {
-    console.log('Downloading GreenMail standalone JAR...');
+    console.log('Downloading GreenMail JAR...');
     await downloadFile(
-      `https://repo1.maven.org/maven2/com/icegreen/greenmail/${GREENMAIL_VERSION}/greenmail-standalone-${GREENMAIL_VERSION}.jar`,
+      `https://repo1.maven.org/maven2/com/icegreen/greenmail/${GREENMAIL_VERSION}/greenmail-${GREENMAIL_VERSION}.jar`,
       jarPath
     );
   }
