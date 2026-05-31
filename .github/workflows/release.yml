@@ -6,6 +6,22 @@ on:
       - 'v*'
   workflow_dispatch:
 
+      - name: Create tag from package.json version (manual runs only)
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          TAG="v$VERSION"
+          echo "Detected version: $VERSION"
+          echo "Tag to create: $TAG"
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG already exists. Skipping tag creation."
+          else
+            git config user.name "github-actions"
+            git config user.email "github-actions@github.com"
+            git tag "$TAG"
+            git push origin "$TAG"
+          fi
+        shell: bash
 permissions:
   contents: write
   packages: write
@@ -61,6 +77,7 @@ jobs:
           chmod +x ./imap-backup-darwin-arm64
 
       - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
