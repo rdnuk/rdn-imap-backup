@@ -1,0 +1,51 @@
+name: GreenMail Latest Release Binary Smoke Test
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  latest-release-binary:
+    strategy:
+      matrix:
+        platform:
+          - os: ubuntu-latest
+            asset: imap-backup-linux-x64
+            useDocker: false
+          - os: ubuntu-latest
+            asset: imap-backup-linux-arm64
+            useDocker: true
+          - os: macos-latest
+            asset: imap-backup-darwin-x64
+            useDocker: false
+          - os: windows-latest
+            asset: imap-backup-windows-x64.exe
+            useDocker: false
+    runs-on: ${{ matrix.platform.os }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.22.2'
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Install dependencies
+        run: npm install --with=dev
+
+      - name: Run release binary GreenMail smoke test
+        run: node scripts/greenmail-release-binary-test.js --asset-name "${{ matrix.platform.asset }}" --output "./latest-release-${{ matrix.platform.asset }}"
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          USE_DOCKER: ${{ matrix.platform.useDocker }}
