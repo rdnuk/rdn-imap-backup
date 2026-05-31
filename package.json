@@ -7,7 +7,8 @@
   "scripts": {
     "start": "node src/index.js",
     "backup": "node src/index.js",
-    "build": "webpack"
+    "build": "webpack",
+    "test:greenmail": "node scripts/greenmail-test.js"
   },
   "dependencies": {
     "imapflow": "^1.0.170",
@@ -15,6 +16,7 @@
     "winston": "^3.17.0"
   },
   "devDependencies": {
+    "nodemailer": "^6.9.5",
     "webpack": "^5.99.9",
     "webpack-cli": "^6.0.1"
   }

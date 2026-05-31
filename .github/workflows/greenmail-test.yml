@@ -1,0 +1,37 @@
+name: GreenMail IMAP Smoke Test
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  greenmail-test:
+    runs-on: ubuntu-latest
+    services:
+      greenmail:
+        image: greenmail/standalone:latest
+        ports:
+          - 3025:3025
+          - 3143:3143
+        options: >
+          --health-cmd="curl -f http://localhost:8080/ || exit 1"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.22.2'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run GreenMail smoke test
+        run: npm run test:greenmail
