@@ -51,23 +51,23 @@ jobs:
         run: npx js2bin --build --node=$NODE_VERSION --platform=windows --arch=x64 --app=$APP_DIR --name=$APP_PREFIX --dir=$JSBIN_DIR --size=6MB
       
       - name: List built binaries
-        run: ls -lh $JSBIN_DIR
+        run: ls -lh
 
       - name: Prepare binaries
         run: |
-          chmod +x $JSBIN_DIR/imap-backup-linux-x64 
-          chmod +x $JSBIN_DIR/imap-backup-linux-arm64 
-          chmod +x $JSBIN_DIR/imap-backup-darwin-x64 
-          chmod +x $JSBIN_DIR/imap-backup-darwin-arm64
+          chmod +x ./imap-backup-linux-x64 
+          chmod +x ./imap-backup-linux-arm64 
+          chmod +x ./imap-backup-darwin-x64 
+          chmod +x ./imap-backup-darwin-arm64
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
           files: |
-            $JSBIN_DIR/imap-backup-linux-x64
-            $JSBIN_DIR/imap-backup-linux-arm64
-            $JSBIN_DIR/imap-backup-darwin-x64
-            $JSBIN_DIR/imap-backup-darwin-arm64
-            $JSBIN_DIR/imap-backup-windows-x64.exe
+            ./imap-backup-linux-x64
+            ./imap-backup-linux-arm64
+            ./imap-backup-darwin-x64
+            ./imap-backup-darwin-arm64
+            ./imap-backup-windows-x64.exe
 
