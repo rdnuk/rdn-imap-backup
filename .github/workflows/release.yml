@@ -1,10 +1,15 @@
-name: Build and Release Binaries
+name: Bump version, Build and Release Binaries
 
 on:
   push:
     tags:
       - 'v*'
   workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'Version bump type for manual releases (default: patch)'
+        required: false
+        default: 'patch'
 
 permissions:
   contents: write
@@ -26,6 +31,23 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Bump package version (manual runs only)
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          TYPE="${{ github.event.inputs.release_type || 'patch' }}"
+          echo "Bumping package version using npm version $TYPE"
+          npm version "$TYPE" --no-git-tag-version
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add package.json
+          git commit -m "Bump version to $(node -p "require('./package.json').version")"
+          git push origin HEAD
+
       - name: Create tag from package.json version (manual runs only)
         id: tag
         if: github.event_name == 'workflow_dispatch'
@@ -45,11 +67,6 @@ jobs:
           fi
           echo "tag=$TAG" >> $GITHUB_OUTPUT
         shell: bash
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
 
       - name: Install dependencies
         run: npm install --with=dev
