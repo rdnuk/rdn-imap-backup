@@ -6,22 +6,6 @@ on:
       - 'v*'
   workflow_dispatch:
 
-      - name: Create tag from package.json version (manual runs only)
-        if: github.event_name == 'workflow_dispatch'
-        run: |
-          VERSION=$(node -p "require('./package.json').version")
-          TAG="v$VERSION"
-          echo "Detected version: $VERSION"
-          echo "Tag to create: $TAG"
-          if git rev-parse "$TAG" >/dev/null 2>&1; then
-            echo "Tag $TAG already exists. Skipping tag creation."
-          else
-            git config user.name "github-actions"
-            git config user.email "github-actions@github.com"
-            git tag "$TAG"
-            git push origin "$TAG"
-          fi
-        shell: bash
 permissions:
   contents: write
   packages: write
@@ -39,6 +23,28 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create tag from package.json version (manual runs only)
+        id: tag
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          TAG="v$VERSION"
+          echo "Detected version: $VERSION"
+          echo "Tag to create: $TAG"
+          git fetch --tags origin
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG already exists. Skipping tag creation."
+          else
+            git config user.name "github-actions"
+            git config user.email "github-actions@github.com"
+            git tag "$TAG"
+            git push origin "$TAG"
+          fi
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+        shell: bash
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -77,9 +83,9 @@ jobs:
           chmod +x ./imap-backup-darwin-arm64
 
       - name: Create GitHub Release
-        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ steps.tag.outputs.tag || github.ref_name }}
           generate_release_notes: true
           files: |
             ./imap-backup-linux-x64
