@@ -72,6 +72,17 @@ jobs:
       - name: Build windows-x64 binary
         run: npx js2bin --build --node=$NODE_VERSION --platform=windows --arch=x64 --app=$APP_DIR --name=$APP_PREFIX --dir=$JSBIN_DIR --size=6MB
       
+      - name: Copy Windows binary to .exe for release
+        run: |
+          if [ -f "$JSBIN_DIR/$APP_PREFIX-windows-x64" ]; then
+            cp "$JSBIN_DIR/$APP_PREFIX-windows-x64" "./$APP_PREFIX-windows-x64.exe"
+          elif [ -f "./$APP_PREFIX-windows-x64" ]; then
+            cp "./$APP_PREFIX-windows-x64" "./$APP_PREFIX-windows-x64.exe"
+          else
+            echo "Warning: Windows binary not found to copy."
+          fi
+        shell: bash
+
       - name: List built binaries
         run: ls -lh
 
