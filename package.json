@@ -1,6 +1,6 @@
 {
   "name": "rdn-imap-backup",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Backs up emails from multiple IMAP accounts to local storage",
   "author": "Ryan Nolan",
   "main": "src/index.js",
